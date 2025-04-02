@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering"
 ]
 keywords = ["machine learning", "equivariant", "electronic structure"]
-requires-python = ">=3.7"
+requires-python = ">=3.8.0"
 dependencies = [
     "ase",
     "e3nn>=0.5.1",
