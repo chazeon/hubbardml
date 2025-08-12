@@ -23,7 +23,7 @@ def main():
     if command == "inspect":
         # Remove the command from sys.argv and call inspect
         sys.argv = [sys.argv[0]] + sys.argv[2:]
-        from .inspect import main as inspect_main
+        from .dataset_inspector import main as inspect_main
         inspect_main()
     elif command == "convert-hdf5":
         # Remove the command from sys.argv and call convert
