@@ -16,15 +16,13 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python",
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering"
 ]
 keywords = ["machine learning", "equivariant", "electronic structure"]
-requires-python = ">=3.8.0"
+requires-python = ">=3.10.0"
 dependencies = [
     "ase",
     "e3nn>=0.5.1",
@@ -43,11 +41,14 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = [
-    'black[d]',
+    "black[d]",
     "flake8",
-    'flit',
-    'pre-commit',
-    'pytest',
+    "flit",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pyarrow-stubs",
+    "h5py_stubs",
 ]
 [project.entry-points."mincepy.plugins.types"]
 "hubbardml" = "hubbardml.provides:get_mincepy_types"
@@ -57,7 +58,7 @@ packages = ["hubbardml"]
 
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 include = '\.pyi?$'
 exclude = '''
 
