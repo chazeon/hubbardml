@@ -21,3 +21,52 @@ As an example, from experiments you can use:
 to run an experiment that trains a model to predict Hubbard U values from a linear-response dataset.
 
 Additional experiments can be found in the `experiments/experiment/` folder.
+
+## Installation
+
+HubbardML uses [uv](https://docs.astral.sh/uv/) for fast dependency management and reproducible environments.
+
+### Install with uv (recommended)
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd hubbardml
+
+# Development setup - installs all dependencies including dev tools
+uv sync --extra dev
+
+# Production setup - runtime dependencies only
+uv sync
+```
+
+### Alternative installation methods
+
+```bash
+# Using uv with pip-style commands
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -e .[dev]
+
+# Traditional pip installation (fallback)
+pip install -e .
+pip install -e .[dev]
+```
+
+### Development Setup
+
+```bash
+# Full development environment
+git clone <repository-url>
+cd hubbardml
+uv sync --extra dev
+
+# Install pre-commit hooks (optional)
+uv run pre-commit install
+```
+
+## Usage
+
+### Running Experiments
+
+From the `experiments/` directory:

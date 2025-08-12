@@ -448,6 +448,14 @@ experiments/outputs/
 experiments/plots/
 
 *arrow
+*.h5
+*.hdf5
 
+# Large datasets and model files
+data_*.arrow
+dataset*.arrow
+*.npz
+*.pth
+trained_model*
 
 .vscode

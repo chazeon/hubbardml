@@ -1,0 +1,35 @@
+{
+    "graph": {
+        "species": ["Fe"], # Will be dynamically updated
+        "with_param_in": False
+    },
+    "model": {
+        "feature_irreps": "4x0e + 4x1e + 4x2e + 4x3e",
+        "hidden_layers": 2,
+        "irrep_normalization": "component"
+    },
+    "training": {
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "max_epochs": 10000,
+        "validate_frac": 0.2,
+        "overfitting_patience": 400,
+        "checkpoint_dir": "checkpoints_pytorch_nodf",
+        "checkpoint_freq": 500,
+        "status_freq": 50,
+        "target_param": keys.PARAM_OUT,
+        "final_model_path": "trained_model_pytorch_nodf.pth",
+        "final_config_path": "config.json"
+    },
+    "data": {
+       "arrow_files": ["dataset.arrow", "dataset_tiger.arrow"],
+       # Define columns needed for the model and target
+      #  "required_feature_cols": [
+      #      keys.ATOM_1_ELEMENT, keys.ATOM_1_OCCS_1, keys.ATOM_1_OCCS_2,
+      #      keys.ATOM_2_ELEMENT, # Needed for determining species
+      #      # Add keys.ATOM_2_OCCS_1, keys.ATOM_2_OCCS_2 if your model uses pair features
+      #  ],
+      #  # Explicitly define target column
+      #  "target_col": keys.PARAM_OUT
+    }
+}
