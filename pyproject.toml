@@ -37,8 +37,9 @@ dependencies = [
     "pandas",
     "polars",
     "pyarrow",
-    "torch>=2.0",
-    "odfpy"  # So that we can save dataframes into ods format
+    "torch>=2.0", # So that we can save dataframes into ods format
+    "odfpy",
+    "h5py>=3.11.0",
 ]
 [project.optional-dependencies]
 dev = [
