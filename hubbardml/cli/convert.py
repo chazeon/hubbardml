@@ -140,17 +140,22 @@ def process_u_parameters(u_data: Dict) -> Dict:
     max_orbitals = max(orbital_types.keys())
     print(f"Using maximum orbital size: {max_orbitals}×{max_orbitals} (padding smaller matrices)")
     
-    # Create occupation array with max size
+    # Create occupation array with max size and track actual dimensions
     occupancy = np.zeros((n_entries, 2, max_orbitals, max_orbitals), dtype=np.float64)
+    orbital_dims = np.zeros(n_entries, dtype=np.int32)  # Track actual matrix size per entry
     
     for i in range(n_entries):
-        # Process spin-up occupancy
+        # Determine the actual orbital size for this entry
+        actual_n_orb = 0
+        
+        # Process spin-up occupancy  
         if occs_1_1[i] is not None:
             if is_nested:
                 # Already in matrix format
                 occs_matrix = np.array(occs_1_1[i])
                 n_orb = occs_matrix.shape[0]
                 occupancy[i, 0, :n_orb, :n_orb] = occs_matrix
+                actual_n_orb = n_orb
             else:
                 # Flattened format, determine size and reshape
                 flat_len = len(occs_1_1[i])
@@ -158,6 +163,7 @@ def process_u_parameters(u_data: Dict) -> Dict:
                 if n_orb > 0:
                     occs_matrix = np.array(occs_1_1[i]).reshape(n_orb, n_orb)
                     occupancy[i, 0, :n_orb, :n_orb] = occs_matrix
+                    actual_n_orb = n_orb
                 
         # Process spin-down occupancy
         if occs_1_2[i] is not None:
@@ -166,6 +172,8 @@ def process_u_parameters(u_data: Dict) -> Dict:
                 occs_matrix = np.array(occs_1_2[i])
                 n_orb = occs_matrix.shape[0]
                 occupancy[i, 1, :n_orb, :n_orb] = occs_matrix
+                if actual_n_orb == 0:  # Only set if not already set by spin-up
+                    actual_n_orb = n_orb
             else:
                 # Flattened format, determine size and reshape
                 flat_len = len(occs_1_2[i])
@@ -173,8 +181,14 @@ def process_u_parameters(u_data: Dict) -> Dict:
                 if n_orb > 0:
                     occs_matrix = np.array(occs_1_2[i]).reshape(n_orb, n_orb)
                     occupancy[i, 1, :n_orb, :n_orb] = occs_matrix
+                    if actual_n_orb == 0:  # Only set if not already set by spin-up
+                        actual_n_orb = n_orb
+        
+        # Record the actual matrix dimension for this entry
+        orbital_dims[i] = actual_n_orb
     
     processed["site0"]["occupancy"] = occupancy
+    processed["site0"]["orbital_dims"] = orbital_dims  # Store actual matrix dimensions
     
     return processed
 
@@ -202,6 +216,8 @@ def process_v_parameters(v_data: Dict) -> Dict:
     site1_elements = []
     site0_occupancies = []
     site1_occupancies = []
+    site0_orbital_dims = []
+    site1_orbital_dims = []
     
     for i in range(n_entries):
         # Get occupation matrix shapes to determine site assignment
@@ -252,6 +268,8 @@ def process_v_parameters(v_data: Dict) -> Dict:
         
         site0_occupancies.append(site0_occ)
         site1_occupancies.append(site1_occ)
+        site0_orbital_dims.append(n_orb_1 if n_orb_1 > 0 else 0)
+        site1_orbital_dims.append(n_orb_2 if n_orb_2 > 0 else 0)
     
     # Convert to numpy arrays
     processed["site0"]["element"] = np.array(site0_elements, dtype="S10")
@@ -273,6 +291,8 @@ def process_v_parameters(v_data: Dict) -> Dict:
     
     processed["site0"]["occupancy"] = site0_occs_padded
     processed["site1"]["occupancy"] = site1_occs_padded
+    processed["site0"]["orbital_dims"] = np.array(site0_orbital_dims, dtype=np.int32)
+    processed["site1"]["orbital_dims"] = np.array(site1_orbital_dims, dtype=np.int32)
     
     return processed
 
@@ -300,6 +320,8 @@ def write_hdf5_dataset(output_path: str, u_processed: Dict, v_processed: Dict) -
             site0_group.create_dataset("element", data=u_processed["site0"]["element"])
             site0_group.create_dataset("occupancy", data=u_processed["site0"]["occupancy"], 
                                      compression="gzip", compression_opts=6)
+            site0_group.create_dataset("orbital_dims", data=u_processed["site0"]["orbital_dims"],
+                                     compression="gzip", compression_opts=6)
             
             # U parameters
             u_group.create_dataset("input", data=u_processed["input"])
@@ -315,6 +337,8 @@ def write_hdf5_dataset(output_path: str, u_processed: Dict, v_processed: Dict) -
                 site_group = v_group.create_group(site_name)
                 site_group.create_dataset("element", data=v_processed[site_name]["element"])
                 site_group.create_dataset("occupancy", data=v_processed[site_name]["occupancy"],
+                                        compression="gzip", compression_opts=6)
+                site_group.create_dataset("orbital_dims", data=v_processed[site_name]["orbital_dims"],
                                         compression="gzip", compression_opts=6)
             
             # Edge data

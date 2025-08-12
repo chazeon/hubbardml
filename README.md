@@ -95,7 +95,7 @@ The datasets used in this work are available for download:
 
 Use the inspection utility to analyze your data:
 ```bash
-uv run python -m hubbardml inspect data_uv_2024_1_25.arrow
+uv run python -m hubbardml inspect data/data_uv_2024_1_25.arrow
 ```
 
 ## Usage

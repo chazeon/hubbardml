@@ -10,11 +10,11 @@ Download the published dataset from the paper's repository:
 
 ```bash
 # Download the main dataset (69MB, 645k entries)
-curl -L -o data_uv_2024_1_25.arrow \
+curl -L -o data/data_uv_2024_1_25.arrow \
   "https://zenodo.org/record/XXXXXX/files/data_uv_2024_1_25.arrow"
 
 # Or download the small test dataset (153KB, 164 entries)  
-curl -L -o dataset.arrow \
+curl -L -o data/dataset.arrow \
   "https://zenodo.org/record/XXXXXX/files/dataset.arrow"
 ```
 
@@ -35,7 +35,7 @@ Always inspect your dataset before training to understand what you're working wi
 
 ```bash
 # Analyze dataset structure and contents
-uv run python -m hubbardml inspect dataset.arrow
+uv run python -m hubbardml inspect data/dataset.arrow
 
 # Example output:
 # ============================================================
@@ -75,7 +75,7 @@ uv run python example/train.py --config example/config.yaml
 
 # Or train with the full dataset
 uv run python example/train.py --config example/config.yaml \
-  --data data_uv_2024_1_25.arrow
+  --data data/data_uv_2024_1_25.arrow
 ```
 
 Training output shows:

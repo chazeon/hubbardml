@@ -28,7 +28,7 @@ training:
 
 # Data configuration
 data:
-  arrow_files: ["dataset.arrow"]  # Fixed: removed non-existent dataset_tiger.arrow
+  arrow_files: ["data/dataset.arrow"]  # Updated path to data directory
   
   # Define columns needed for the model and target (re-enabled)
   required_feature_cols:
