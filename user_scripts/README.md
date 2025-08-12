@@ -1,22 +1,26 @@
-# User Scripts
+# User Scripts → Moved to Example
 
-This directory contains custom scripts created by the user to work around limitations in the main HubbardML codebase.
+**Note**: This directory contained custom workaround scripts that have now been transformed into a proper getting-started example.
 
-## Files
+## ✅ New Location: `example/` Directory
 
-- `train.py` - Custom training script (410 lines) that bypasses the main training infrastructure
-- `make_dataset.py` - Custom dataset creation from QE outputs  
-- `predict.py` - Custom inference script with manual config loading (located in `hubbardml/predict.py`)
-- `parse_pw3.py` - Custom parser for SCF occupation extraction (located in `hubbardml/parse_pw3.py`)
+The user scripts have been cleaned up and moved to `example/` with proper documentation:
 
-## Context
+- `example/train.py` - Working training script with clear documentation
+- `example/predict.py` - Inference script for making predictions
+- `example/config.yaml` - Fixed configuration file (proper YAML format)
+- `example/README.md` - Step-by-step workflow guide
 
-These scripts were created because the main HubbardML training/inference pipeline was difficult to use:
+## Remaining Files
 
-1. **Training**: Existing `training.py` was too complex, required custom `train.py`
-2. **Inference**: No easy model reconstruction, required custom `predict.py` with manual JSON config
-3. **Data**: No QE parsing pipeline, required custom data processing scripts
+- `make_dataset.py` - Custom dataset creation from QE outputs (kept for reference)
 
-## Future
+## Migration Complete
 
-These scripts demonstrate the usability pain points that are being addressed in the main refactoring plan (see `PLAN.md`). Once the main pipeline is improved, these custom scripts should no longer be necessary.
+The workaround scripts have been transformed into:
+1. **Proper documentation** with data download instructions
+2. **Clear workflow** (inspect → train → predict)
+3. **Fixed configuration** (no more JSON+comments syntax errors)
+4. **Troubleshooting guide** for common issues
+
+See `example/README.md` for the complete getting-started workflow.

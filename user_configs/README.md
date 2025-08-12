@@ -1,18 +1,23 @@
-# User Configuration Files
+# User Configuration Files → Fixed and Moved
 
-This directory contains user-created configuration files.
+**Note**: This directory contained broken configuration files that have now been fixed and moved to the example.
 
-## Files
+## ✅ Fixed and Moved to Example
 
-- `config_user.yaml` - User's custom config file (has syntax issues that need fixing)
+The broken config file has been **fixed and moved** to `example/config.yaml`:
 
-## Issues with config_user.yaml
+### Issues That Were Resolved:
+1. **✅ JSON+Comments → Proper YAML**: Converted to valid YAML syntax
+2. **✅ Undefined constants**: Replaced `keys.PARAM_OUT` with `"param_out"` strings  
+3. **✅ Re-enabled features**: Uncommented `required_feature_cols` and `target_col`
+4. **✅ Fixed file references**: Removed non-existent `dataset_tiger.arrow`
 
-The user's config file has several problems that prevent it from working:
+### New Location:
+- **Working config**: `example/config.yaml` 
+- **Documentation**: `example/README.md`
+- **Complete workflow**: Download data → inspect → train → predict
 
-1. **Invalid JSON/YAML syntax** - Uses `#` comments in JSON format
-2. **Missing imports** - References `keys.*` constants without importing 
-3. **Commented out critical settings** - `required_feature_cols` and `target_col` disabled
-4. **Wrong file references** - Points to non-existent files
+The config file is now properly formatted and functional for training models.
 
-This config needs to be fixed or replaced with a working version based on the official `experiments/config.yaml`.
+## Files Remaining:
+- `config_user.yaml` - Original broken file (kept for reference)
