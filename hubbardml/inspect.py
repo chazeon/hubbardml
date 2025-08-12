@@ -7,8 +7,9 @@ Provides insights into data structure, storage efficiency, and parameter distrib
 
 import sys
 from dataclasses import dataclass, field
+from itertools import product
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, Tuple, Optional, Union
 import numpy as np
 import click
 import h5py
@@ -164,7 +165,8 @@ class DatasetAnalysis:
         """Analyze occupation matrix columns in Arrow table."""
         occupation_analysis = {}
         
-        for occs_col in ["atom_1_occs_1", "atom_1_occs_2", "atom_2_occs_1", "atom_2_occs_2"]:
+        for i_atom, i_occs in product([1, 2], [1, 2]):
+            occs_col = f"atom_{i_atom}_occs_{i_occs}"
             if occs_col not in table.column_names:
                 continue
                 
@@ -199,7 +201,8 @@ class DatasetAnalysis:
         """Calculate storage analysis for Arrow table."""
         occs_storage_mb = 0.0
         
-        for occs_col in ["atom_1_occs_1", "atom_1_occs_2", "atom_2_occs_1", "atom_2_occs_2"]:
+        for i_atom, i_occs in product([1, 2], [1, 2]):
+            occs_col = f"atom_{i_atom}_occs_{i_occs}"
             if occs_col not in table.column_names:
                 continue
                 
