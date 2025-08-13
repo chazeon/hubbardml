@@ -25,19 +25,19 @@ keywords = ["machine learning", "equivariant", "electronic structure"]
 requires-python = ">=3.10.0"
 dependencies = [
     "ase",
+    "click",
     "e3nn>=0.5.1",
     "e3psi~=0.3",
+    "h5py>=3.11.0",
     "hydra-core",
+    "jinja2",
     "matplotlib",
-    "meson",
     "mincepy[sci]",
     "numpy",
     "pandas",
-    "polars",
     "pyarrow",
-    "torch>=2.0", # So that we can save dataframes into ods format
-    "odfpy",
-    "h5py>=3.11.0",
+    "pyyaml",
+    "torch>=2.0",
 ]
 [project.optional-dependencies]
 dev = [
@@ -50,15 +50,18 @@ dev = [
     "pyarrow-stubs",
     "h5py_stubs",
 ]
+experiments = [
+    "odfpy",
+]
+[project.scripts]
+hubbard = "hubbardml.__main__:main"
+
 [project.entry-points."mincepy.plugins.types"]
 "hubbardml" = "hubbardml.provides:get_mincepy_types"
 
-[tool.setuptools]
-packages = ["hubbardml"]
-
 [tool.black]
 line-length = 100
-target-version = ["py38", "py39", "py310", "py311", "py312"]
+target-version = ["py310", "py311", "py312"]
 include = '\.pyi?$'
 exclude = '''
 
