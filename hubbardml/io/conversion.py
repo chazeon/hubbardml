@@ -2,7 +2,21 @@
 
 import numpy as np
 from pathlib import Path
-from .formats import UData, VData, save_hdf5
+from .formats import UData, VData, Site, Edge, save_u_hdf5, save_v_hdf5
+
+
+def get_orbital_label(element):
+    """Get orbital label for element."""
+    # Standard mapping - can be made more sophisticated later
+    p_block = {"O": "2p", "S": "3p"}
+    d_block = {"Ni": "3d", "Fe": "3d", "Mn": "3d", "Co": "3d", "Ti": "3d"}
+    
+    if element in p_block:
+        return p_block[element]
+    elif element in d_block:
+        return d_block[element]
+    else:
+        return f"{element}-unk"  # Unknown, but keep element info
 
 
 def load_arrow(file_path):
@@ -66,30 +80,37 @@ def convert_arrow_to_hdf5(input_path, output_path):
     # U data
     u = UData()
     if u_idx:
-        u.site.elements = np.array([data["atom_1_element"][i] for i in u_idx], dtype="S10")
-        u.params.input = np.array([data.get("param_in", [0])[i] for i in u_idx])
-        u.params.target = np.array([data["param_out"][i] for i in u_idx])
+        u.site0.elems = np.array([data["atom_1_element"][i] for i in u_idx], dtype="S10")
+        u.input = np.array([data.get("param_in", [0])[i] for i in u_idx])
+        u.target = np.array([data["param_out"][i] for i in u_idx])
         
         up = fix_occs([data["atom_1_occs_1"][i] for i in u_idx])
         down = fix_occs([data["atom_1_occs_2"][i] for i in u_idx])
-        u.site.occupancy, u.site.orbital_dims = make_occs_array(up, down)
+        u.site0.occs, orbital_dims = make_occs_array(up, down)
+        
+        # Generate orbital labels from elements
+        u.site0.orbs = np.array([get_orbital_label(elem) for elem in u.site0.elems])
     
     # V data  
     v = VData()
     if v_idx:
-        v.site0.elements = np.array([data["atom_1_element"][i] for i in v_idx], dtype="S10")
-        v.site1.elements = np.array([data["atom_2_element"][i] for i in v_idx], dtype="S10") 
-        v.distance = np.array([data.get("dist_in", [0])[i] for i in v_idx])
-        v.params.input = np.array([data.get("param_in", [0])[i] for i in v_idx])
-        v.params.target = np.array([data["param_out"][i] for i in v_idx])
+        v.site0.elems = np.array([data["atom_1_element"][i] for i in v_idx], dtype="S10")
+        v.site1.elems = np.array([data["atom_2_element"][i] for i in v_idx], dtype="S10") 
+        v.edge.dist = np.array([data.get("dist_in", [0])[i] for i in v_idx])
+        v.input = np.array([data.get("param_in", [0])[i] for i in v_idx])
+        v.target = np.array([data["param_out"][i] for i in v_idx])
         
         up0 = fix_occs([data["atom_1_occs_1"][i] for i in v_idx])
         down0 = fix_occs([data["atom_1_occs_2"][i] for i in v_idx])
         up1 = fix_occs([data["atom_2_occs_1"][i] for i in v_idx])
         down1 = fix_occs([data["atom_2_occs_2"][i] for i in v_idx])
         
-        v.site0.occupancy, v.site0.orbital_dims = make_occs_array(up0, down0)
-        v.site1.occupancy, v.site1.orbital_dims = make_occs_array(up1, down1)
+        v.site0.occs, _ = make_occs_array(up0, down0)
+        v.site1.occs, _ = make_occs_array(up1, down1)
+        
+        # Generate orbital labels from elements
+        v.site0.orbs = np.array([get_orbital_label(elem) for elem in v.site0.elems])
+        v.site1.orbs = np.array([get_orbital_label(elem) for elem in v.site1.elems])
     
     # Save
     import h5py
@@ -97,9 +118,9 @@ def convert_arrow_to_hdf5(input_path, output_path):
         hub = f.create_group("hubbard")
         
         if len(u) > 0:
-            save_hdf5(u, hub.create_group("u"))
+            save_u_hdf5(u, hub.create_group("u"))
         if len(v) > 0:
-            save_hdf5(v, hub.create_group("v"))
+            save_v_hdf5(v, hub.create_group("v"))
     
     # Stats
     in_mb = Path(input_path).stat().st_size / 1024**2

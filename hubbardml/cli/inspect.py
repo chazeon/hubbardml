@@ -1,4 +1,4 @@
-"""Inspect Arrow datasets."""
+"""Inspect Arrow and HDF5 datasets."""
 
 import sys
 from pathlib import Path
@@ -13,6 +13,71 @@ def load_arrow(file_path):
         table = pa.ipc.RecordBatchFileReader(source).read_all()
     
     return {col: table[col].to_pylist() for col in table.column_names}, table
+
+
+def load_hdf5(file_path):
+    """Load HDF5 file."""
+    import h5py
+    with h5py.File(file_path, 'r') as f:
+        return dict(f['hubbard'].keys()), f['hubbard']
+
+
+def inspect_hdf5(file_path):
+    """Inspect HDF5 dataset."""
+    print(f"Loading {file_path}...")
+    
+    import h5py
+    size_mb = Path(file_path).stat().st_size / 1024**2
+    print(f"\n{Path(file_path).name}")
+    print(f"Size: {size_mb:.1f}MB")
+    
+    with h5py.File(file_path, 'r') as f:
+        if 'hubbard' not in f:
+            print("No /hubbard group found")
+            return
+        
+        hub = f['hubbard']
+        param_types = list(hub.keys())
+        print(f"Parameter types: {param_types}")
+        
+        for ptype in param_types:
+            if ptype not in hub:
+                continue
+                
+            group = hub[ptype]
+            print(f"\n{ptype.upper()} Parameters:")
+            
+            # Count entries
+            if 'target' in group:
+                count = len(group['target'])
+                target_vals = group['target'][:]
+                print(f"  Count: {count:,}")
+                print(f"  Range: {target_vals.min():.2f}-{target_vals.max():.2f} eV (avg {target_vals.mean():.2f})")
+            
+            # Sites
+            sites = [k for k in group.keys() if k.startswith('site')]
+            if sites:
+                print(f"  Sites: {sites}")
+                for site in sites:
+                    if 'elems' in group[site]:
+                        elems = [e.decode() if isinstance(e, bytes) else e for e in group[site]['elems']]
+                        elem_counts = {}
+                        for e in elems:
+                            elem_counts[e] = elem_counts.get(e, 0) + 1
+                        print(f"    {site}: {dict(sorted(elem_counts.items()))}")
+                    
+                    if 'orbs' in group[site]:
+                        orbs = [o.decode() if isinstance(o, bytes) else o for o in group[site]['orbs']]
+                        orb_counts = {}
+                        for o in orbs:
+                            orb_counts[o] = orb_counts.get(o, 0) + 1
+                        print(f"    {site} orbitals: {dict(sorted(orb_counts.items()))}")
+            
+            # Edge info for V
+            if 'edge' in group:
+                if 'dist' in group['edge']:
+                    dists = group['edge']['dist'][:]
+                    print(f"  Distances: {dists.min():.2f}-{dists.max():.2f} Å (avg {dists.mean():.2f})")
 
 
 def inspect_dataset(file_path):
@@ -104,24 +169,37 @@ def inspect_dataset(file_path):
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--summary", is_flag=True, help="Just show basic info")
 def main(input_file: Path, summary: bool):
-    """Inspect Arrow dataset.
+    """Inspect Arrow or HDF5 dataset.
     
     Examples:
       uv run python -m hubbardml inspect data.arrow
+      uv run python -m hubbardml inspect data.h5
       uv run python -m hubbardml inspect data.arrow --summary
     """
-    if input_file.suffix.lower() != '.arrow':
-        click.echo(f"Error: Need .arrow file, got {input_file.suffix}", err=True)
+    suffix = input_file.suffix.lower()
+    
+    if suffix not in ['.arrow', '.h5', '.hdf5']:
+        click.echo(f"Error: Unsupported format {suffix}. Use .arrow, .h5, or .hdf5", err=True)
         sys.exit(1)
     
     try:
-        if summary:
-            data, table = load_arrow(str(input_file))
-            size_mb = Path(input_file).stat().st_size / 1024**2
-            ptypes = len(set(data.get("param_type", [])))
-            print(f"{input_file.name}: {size_mb:.1f}MB, {table.num_rows:,} rows, {ptypes} param types")
-        else:
-            inspect_dataset(str(input_file))
+        if suffix == '.arrow':
+            if summary:
+                data, table = load_arrow(str(input_file))
+                size_mb = Path(input_file).stat().st_size / 1024**2
+                ptypes = len(set(data.get("param_type", [])))
+                print(f"{input_file.name}: {size_mb:.1f}MB, {table.num_rows:,} rows, {ptypes} param types")
+            else:
+                inspect_dataset(str(input_file))
+        else:  # HDF5
+            if summary:
+                import h5py
+                size_mb = Path(input_file).stat().st_size / 1024**2
+                with h5py.File(input_file, 'r') as f:
+                    ptypes = len(list(f['hubbard'].keys())) if 'hubbard' in f else 0
+                print(f"{input_file.name}: {size_mb:.1f}MB, HDF5, {ptypes} param types")
+            else:
+                inspect_hdf5(str(input_file))
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)

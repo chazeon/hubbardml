@@ -8,26 +8,26 @@ import numpy as np
 @dataclass
 class Site:
     """Atomic site data."""
-    elements: np.ndarray = field(default_factory=lambda: np.array([]))
-    occupancy: Optional[np.ndarray] = field(default=None)  # (N, 2, orb, orb) 
-    orbital_dims: Optional[np.ndarray] = field(default=None)  # (N,) actual orbital count per entry
+    elems: np.ndarray = field(default_factory=lambda: np.array([]))
+    occs: Optional[np.ndarray] = field(default=None)  # (N, 2, orb, orb) 
+    orbs: Optional[np.ndarray] = field(default=None)  # (N,) orbital labels ["3d", "2p", ...]
 
 
 @dataclass
-class Parameters:
-    """Hubbard parameter values."""
-    input: np.ndarray = field(default_factory=lambda: np.array([]))
-    target: np.ndarray = field(default_factory=lambda: np.array([]))
+class Edge:
+    """Edge data between sites."""
+    dist: np.ndarray = field(default_factory=lambda: np.array([]))
 
 
 @dataclass 
 class UData:
     """U parameter dataset."""
-    site: Site = field(default_factory=lambda: Site())
-    params: Parameters = field(default_factory=lambda: Parameters())
+    site0: Site = field(default_factory=lambda: Site())
+    input: np.ndarray = field(default_factory=lambda: np.array([]))
+    target: np.ndarray = field(default_factory=lambda: np.array([]))
     
     def __len__(self):
-        return len(self.params.target)
+        return len(self.target)
 
 
 @dataclass
@@ -35,11 +35,12 @@ class VData:
     """V parameter dataset.""" 
     site0: Site = field(default_factory=lambda: Site())
     site1: Site = field(default_factory=lambda: Site())
-    distance: np.ndarray = field(default_factory=lambda: np.array([]))
-    params: Parameters = field(default_factory=lambda: Parameters())
+    edge: Edge = field(default_factory=lambda: Edge())
+    input: np.ndarray = field(default_factory=lambda: np.array([]))
+    target: np.ndarray = field(default_factory=lambda: np.array([]))
     
     def __len__(self):
-        return len(self.params.target)
+        return len(self.target)
 
 
 def save_hdf5(data, group):
@@ -59,14 +60,103 @@ def save_hdf5(data, group):
             group.attrs[name] = value
 
 
-def load_hdf5(data, group):
-    """Load data from HDF5 group."""
+def save_u_hdf5(u_data, group):
+    """Save U data with flat HDF5 structure."""
+    # Site data
+    site_group = group.create_group("site0")
+    save_hdf5(u_data.site0, site_group)
+    
+    # Hubbard values - flat in main group  
+    group.create_dataset("target", data=u_data.target, compression='gzip')
+    group.create_dataset("input", data=u_data.input, compression='gzip')
+
+
+def save_v_hdf5(v_data, group):
+    """Save V data with flat HDF5 structure."""
+    # Site data
+    site0_group = group.create_group("site0")
+    save_hdf5(v_data.site0, site0_group)
+    
+    site1_group = group.create_group("site1")  
+    save_hdf5(v_data.site1, site1_group)
+    
+    # Edge data
+    edge_group = group.create_group("edge")
+    save_hdf5(v_data.edge, edge_group)
+    
+    # Hubbard values - flat in main group
+    group.create_dataset("target", data=v_data.target, compression='gzip')
+    group.create_dataset("input", data=v_data.input, compression='gzip')
+
+
+def _load_group_to_dataclass(data, group):
+    """Load HDF5 group into dataclass (internal helper)."""
     for name in data.__dict__.keys():
         if name in group:
             item = group[name]
             if hasattr(item, 'keys'):  # subgroup
-                load_hdf5(getattr(data, name), item)
+                _load_group_to_dataclass(getattr(data, name), item)
             else:  # dataset
                 setattr(data, name, np.array(item))
         elif name in group.attrs:
             setattr(data, name, group.attrs[name])
+
+
+def load_u_data(group):
+    """Load U data from HDF5 group."""
+    u = UData()
+    
+    # Load site data
+    if 'site0' in group:
+        _load_group_to_dataclass(u.site0, group['site0'])
+    
+    # Load Hubbard values
+    if 'target' in group:
+        u.target = np.array(group['target'])
+    if 'input' in group:
+        u.input = np.array(group['input'])
+    
+    return u
+
+
+def load_v_data(group):
+    """Load V data from HDF5 group."""
+    v = VData()
+    
+    # Load site data
+    if 'site0' in group:
+        _load_group_to_dataclass(v.site0, group['site0'])
+    if 'site1' in group:
+        _load_group_to_dataclass(v.site1, group['site1'])
+    
+    # Load edge data
+    if 'edge' in group:
+        _load_group_to_dataclass(v.edge, group['edge'])
+    
+    # Load Hubbard values
+    if 'target' in group:
+        v.target = np.array(group['target'])
+    if 'input' in group:
+        v.input = np.array(group['input'])
+    
+    return v
+
+
+def load_hdf5(file_path):
+    """Load HDF5 file and return U/V data."""
+    try:
+        import h5py
+    except ImportError:
+        raise ImportError("h5py not available. Install with: uv add h5py")
+    
+    u_data, v_data = None, None
+    
+    with h5py.File(file_path, 'r') as f:
+        if 'hubbard' in f:
+            hub = f['hubbard']
+            if 'u' in hub:
+                u_data = load_u_data(hub['u'])
+            if 'v' in hub:
+                v_data = load_v_data(hub['v'])
+    
+    return u_data, v_data
