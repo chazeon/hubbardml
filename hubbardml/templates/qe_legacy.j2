@@ -1,0 +1,11 @@
+&system
+  lda_plus_u = .true.
+  lda_plus_u_kind = {{ lda_plus_u_kind|default(2) }}
+  U_projection_type = '{{ projection_type|default('ortho-atomic') }}'
+{%- for pred in u_predictions %}
+  Hubbard_V({{ get_atom_index(pred.site_data) }},{{ get_atom_index(pred.site_data) }},1) = {{ "%.2f"|format(pred.value) }}
+{%- endfor %}
+{%- for pred in v_predictions %}
+  Hubbard_V({{ get_atom_index(pred.site0_data) }},{{ get_atom_index(pred.site1_data) }},1) = {{ "%.2f"|format(pred.value) }}
+{%- endfor %}
+/

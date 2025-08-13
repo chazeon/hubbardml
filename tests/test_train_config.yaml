@@ -1,0 +1,18 @@
+# Minimal training config for end-to-end pipeline test
+# Fast training with few epochs for testing
+
+graph:
+  with_param_in: false
+
+model:
+  feature_irreps: "2x0e + 1x1e + 1x2e"  # Smaller model for fast training
+  hidden_layers: 1
+  irrep_normalization: "component"
+
+training:
+  learning_rate: 0.01        # Higher LR for faster convergence
+  batch_size: 16             # Small batch size for test data
+  max_epochs: 50             # Just a few epochs
+  val_split: 0.2             # Validation split (20%)
+  patience: 20               # Early stopping patience
+  log_every_n_epochs: 10     # Print every 10 epochs

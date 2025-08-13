@@ -1,0 +1,18 @@
+# Example training configuration for HubbardML
+# Use with: uv run python -m hubbardml train data.h5 model_output/ --config example_train_config.yaml
+
+graph:
+  with_param_in: false
+
+model:
+  feature_irreps: "4x0e + 4x1e + 4x2e"
+  hidden_layers: 2  
+  irrep_normalization: "component"
+
+training:
+  learning_rate: 0.001
+  batch_size: 32
+  max_epochs: 1000
+  val_split: 0.2             # Validation split (20%)
+  patience: 100              # Early stopping patience  
+  log_every_n_epochs: 50     # Print every 50 epochs

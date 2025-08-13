@@ -91,15 +91,42 @@ def save_v_hdf5(v_data, group):
 
 def _load_group_to_dataclass(data, group):
     """Load HDF5 group into dataclass (internal helper)."""
+    # Name mapping for compatibility
+    name_map = {
+        'elems': ['elems', 'element'],  # Try both plural and singular
+        'occs': ['occs', 'occupancy'],  # Try both names
+        'orbs': ['orbs', 'orbital'],    # Try both names
+    }
+    
     for name in data.__dict__.keys():
-        if name in group:
-            item = group[name]
-            if hasattr(item, 'keys'):  # subgroup
-                _load_group_to_dataclass(getattr(data, name), item)
-            else:  # dataset
-                setattr(data, name, np.array(item))
-        elif name in group.attrs:
-            setattr(data, name, group.attrs[name])
+        found = False
+        # Try all possible names for this field
+        possible_names = name_map.get(name, [name])
+        
+        for possible_name in possible_names:
+            if possible_name in group:
+                item = group[possible_name]
+                if hasattr(item, 'keys'):  # subgroup
+                    _load_group_to_dataclass(getattr(data, name), item)
+                else:  # dataset
+                    setattr(data, name, np.array(item))
+                found = True
+                break
+            elif possible_name in group.attrs:
+                setattr(data, name, group.attrs[possible_name])
+                found = True
+                break
+        
+        # If not found, try the original logic
+        if not found:
+            if name in group:
+                item = group[name]
+                if hasattr(item, 'keys'):  # subgroup
+                    _load_group_to_dataclass(getattr(data, name), item)
+                else:  # dataset
+                    setattr(data, name, np.array(item))
+            elif name in group.attrs:
+                setattr(data, name, group.attrs[name])
 
 
 def load_u_data(group):

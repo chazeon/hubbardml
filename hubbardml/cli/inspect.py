@@ -3,11 +3,13 @@
 import sys
 from pathlib import Path
 import click
+import pyarrow as pa
+import h5py
+import numpy as np
 
 
 def load_arrow(file_path):
     """Load Arrow file."""
-    import pyarrow as pa
     
     with pa.memory_map(file_path, "rb") as source:
         table = pa.ipc.RecordBatchFileReader(source).read_all()
@@ -17,7 +19,6 @@ def load_arrow(file_path):
 
 def load_hdf5(file_path):
     """Load HDF5 file."""
-    import h5py
     with h5py.File(file_path, 'r') as f:
         return dict(f['hubbard'].keys()), f['hubbard']
 
@@ -25,8 +26,6 @@ def load_hdf5(file_path):
 def inspect_hdf5(file_path):
     """Inspect HDF5 dataset."""
     print(f"Loading {file_path}...")
-    
-    import h5py
     size_mb = Path(file_path).stat().st_size / 1024**2
     print(f"\n{Path(file_path).name}")
     print(f"Size: {size_mb:.1f}MB")
@@ -94,7 +93,6 @@ def inspect_dataset(file_path):
     
     # Parameters
     if "param_type" in data and "param_out" in data:
-        import numpy as np
         types = data["param_type"]
         values = data["param_out"]
         
@@ -193,7 +191,6 @@ def main(input_file: Path, summary: bool):
                 inspect_dataset(str(input_file))
         else:  # HDF5
             if summary:
-                import h5py
                 size_mb = Path(input_file).stat().st_size / 1024**2
                 with h5py.File(input_file, 'r') as f:
                     ptypes = len(list(f['hubbard'].keys())) if 'hubbard' in f else 0

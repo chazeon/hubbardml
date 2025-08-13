@@ -17,11 +17,11 @@ training:
   learning_rate: 0.001
   batch_size: 64
   max_epochs: 10000
-  validate_frac: 0.2
-  overfitting_patience: 400
+  val_split: 0.2             # Validation split (20%)
+  patience: 400              # Early stopping patience
   checkpoint_dir: "checkpoints_pytorch_nodf"
   checkpoint_freq: 500
-  status_freq: 50
+  log_every_n_epochs: 50     # Print every 50 epochs
   target_param: "param_out"  # Fixed: was keys.PARAM_OUT without import
   final_model_path: "trained_model_pytorch_nodf.pth"
   final_config_path: "config.json"

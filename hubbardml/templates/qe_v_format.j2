@@ -1,0 +1,7 @@
+HUBBARD ({{ projection_type|default('ortho-atomic') }})
+{%- for pred in u_predictions %}
+V {{ pred.element }}-{{ pred.orbital }} {{ pred.element }}-{{ pred.orbital }} 1 1 {{ "%.2f"|format(pred.value) }}
+{%- endfor %}
+{%- for pred in v_predictions %}
+V {{ pred.site0_element }}-{{ pred.site0_orbital }} {{ pred.site1_element }}-{{ pred.site1_orbital }} {{ get_atom_index(pred.site0_data) }} {{ get_atom_index(pred.site1_data) }} {{ "%.2f"|format(pred.value) }}
+{%- endfor %}

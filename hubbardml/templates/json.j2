@@ -1,0 +1,30 @@
+{
+  "model_info": {
+    "name": "{{ model_name }}",
+    "type": "{{ model_type }}",
+    "timestamp": "{{ timestamp }}"
+  },
+  "system": "{{ system_name }}",
+  "predictions": {
+    "u_parameters": [
+      {%- for pred in u_predictions %}
+      {
+        "element": "{{ pred.element }}",
+        "orbital": "{{ pred.orbital }}",
+        "value": {{ pred.value }},
+        "confidence": {{ pred.confidence|default(0.0) }}
+      }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ],
+    "v_parameters": [
+      {%- for pred in v_predictions %}
+      {
+        "site0": {"element": "{{ pred.site0_element }}", "orbital": "{{ pred.site0_orbital }}"},
+        "site1": {"element": "{{ pred.site1_element }}", "orbital": "{{ pred.site1_orbital }}"},
+        "value": {{ pred.value }},
+        "confidence": {{ pred.confidence|default(0.0) }}
+      }{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    ]
+  }
+}

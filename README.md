@@ -14,6 +14,32 @@ Uhrin, M., Zadoks, A., Binci, L., Marzari, N., & Timrov, I. (2025). Machine lear
 
 ## Quick Start
 
+### Option 1: CLI Tools (Recommended)
+
+Use the modern CLI interface for training and prediction:
+
+```bash
+# Install with development dependencies
+uv sync --extra dev
+
+# Test the complete pipeline
+uv run python tests/test_end_to_end.py
+
+# Train a model (uses PyTorch Lightning-style config)
+uv run python -m hubbardml.cli.train data/dataset_test.h5 example_train_config.yaml model_output/
+
+# Make predictions
+uv run python -m hubbardml.cli.predict model_output/ scf.out
+
+# Inspect datasets
+uv run python -m hubbardml.cli.inspect data/dataset_test.h5
+
+# Convert data formats
+uv run python -m hubbardml.cli.convert data/dataset.arrow data/dataset_test.h5
+```
+
+### Option 2: Example Scripts
+
 For a simple getting-started example, see the `example/` directory:
 
 ```bash
