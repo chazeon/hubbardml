@@ -1,0 +1,27 @@
+# V Model Training Configuration  
+# Inter-site Hubbard V parameter prediction
+
+data:
+  file: "data/dataset_main.h5"        # Path to HDF5 data file
+  model_type: "v"                     # V model for inter-site interactions
+
+graph:
+  species: ["Fe", "Ni", "Mn", "O"]    # Both d-block and p-block elements for V
+  with_param_in: false                # Don't use input parameters as features
+
+model:
+  feature_irreps: "4x0e + 4x1e + 4x2e + 4x3e"  # Include l=3 for inter-site complexity
+  hidden_layers: 2                    # Number of hidden layers
+  irrep_normalization: "component"    # Normalization method
+
+training:
+  learning_rate: 0.001               # Adam optimizer learning rate  
+  batch_size: 32                     # Can use larger batches for V models
+  max_epochs: 1000                   # Maximum training epochs
+  val_split: 0.2                     # Validation split (20%)
+  patience: 100                      # Early stopping patience
+  log_every_n_epochs: 50             # Print progress every N epochs
+
+# Expected output: V parameters 0.1-2 eV for inter-site interactions
+# Handles p-p, d-p, and d-d interactions
+# Typical training time: 15-45 minutes on GPU

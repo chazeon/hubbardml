@@ -81,7 +81,11 @@ def convert_arrow_to_hdf5(input_path, output_path):
     u = UData()
     if u_idx:
         u.site0.elems = np.array([data["atom_1_element"][i] for i in u_idx], dtype="S10")
-        u.input = np.array([data.get("param_in", [0])[i] for i in u_idx])
+        # Handle optional param_in field
+        if "param_in" in data and len(data["param_in"]) > max(u_idx):
+            u.input = np.array([data["param_in"][i] for i in u_idx])
+        else:
+            u.input = np.zeros(len(u_idx))  # Default to zeros if not available
         u.target = np.array([data["param_out"][i] for i in u_idx])
         
         up = fix_occs([data["atom_1_occs_1"][i] for i in u_idx])
@@ -96,8 +100,17 @@ def convert_arrow_to_hdf5(input_path, output_path):
     if v_idx:
         v.site0.elems = np.array([data["atom_1_element"][i] for i in v_idx], dtype="S10")
         v.site1.elems = np.array([data["atom_2_element"][i] for i in v_idx], dtype="S10") 
-        v.edge.dist = np.array([data.get("dist_in", [0])[i] for i in v_idx])
-        v.input = np.array([data.get("param_in", [0])[i] for i in v_idx])
+        # Handle optional dist_in field
+        if "dist_in" in data and len(data["dist_in"]) > max(v_idx):
+            v.edge.dist = np.array([data["dist_in"][i] for i in v_idx])
+        else:
+            v.edge.dist = np.zeros(len(v_idx))  # Default to zeros if not available
+            
+        # Handle optional param_in field  
+        if "param_in" in data and len(data["param_in"]) > max(v_idx):
+            v.input = np.array([data["param_in"][i] for i in v_idx])
+        else:
+            v.input = np.zeros(len(v_idx))  # Default to zeros if not available
         v.target = np.array([data["param_out"][i] for i in v_idx])
         
         up0 = fix_occs([data["atom_1_occs_1"][i] for i in v_idx])

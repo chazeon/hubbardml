@@ -53,6 +53,9 @@ def save_hdf5(data, group):
             save_hdf5(value, subgroup) 
         elif isinstance(value, np.ndarray) and value.size > 0:
             if value.dtype.kind in ['U', 'S']:  # strings
+                # Convert Unicode strings to byte strings for HDF5 compatibility
+                if value.dtype.kind == 'U':
+                    value = value.astype('S')
                 group.create_dataset(name, data=value)
             else:
                 group.create_dataset(name, data=value, compression='gzip')

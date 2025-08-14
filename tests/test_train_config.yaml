@@ -1,7 +1,12 @@
 # Minimal training config for end-to-end pipeline test
 # Fast training with few epochs for testing
 
+data:
+  file: "../data/dataset_test.h5"     # Path to HDF5 data file  
+  model_type: "u"                     # Model type: u or v
+
 graph:
+  species: ["Fe"]                     # Test data only has Fe
   with_param_in: false
 
 model:

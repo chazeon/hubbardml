@@ -16,7 +16,7 @@ def main():
         print("  inspect       Inspect dataset files (Arrow/HDF5)")
         print("  convert       Convert between Arrow and HDF5 formats")
         print("\nExamples:")
-        print("  python -m hubbardml train data.h5 config.yaml output/")
+        print("  python -m hubbardml train config.yaml output/")
         print("  python -m hubbardml predict model/ scf.out")
         print("  python -m hubbardml inspect data.arrow")
         print("  python -m hubbardml convert data.arrow dataset.h5")

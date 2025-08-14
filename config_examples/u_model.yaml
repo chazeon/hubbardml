@@ -1,0 +1,26 @@
+# U Model Training Configuration
+# On-site Hubbard U parameter prediction
+
+data:
+  file: "data/dataset_main.h5"        # Path to HDF5 data file
+  model_type: "u"                     # U model for on-site interactions
+
+graph:
+  species: ["Fe", "Ni", "Mn"]         # d-block elements for U parameters
+  with_param_in: false                # Don't use input parameters as features
+
+model:
+  feature_irreps: "4x0e + 4x1e + 4x2e"  # Feature representation (no l=3 for efficiency)
+  hidden_layers: 2                    # Number of hidden layers
+  irrep_normalization: "component"    # Normalization method
+
+training:
+  learning_rate: 0.001               # Adam optimizer learning rate
+  batch_size: 16                     # Small batches to prevent overfitting
+  max_epochs: 1000                   # Maximum training epochs
+  val_split: 0.2                     # Validation split (20%)
+  patience: 100                      # Early stopping patience
+  log_every_n_epochs: 50             # Print progress every N epochs
+
+# Expected output: U parameters 3-8 eV for d-orbitals
+# Typical training time: 10-30 minutes on GPU

@@ -1,7 +1,13 @@
 # Example training configuration for HubbardML
-# Use with: uv run python -m hubbardml train data.h5 model_output/ --config example_train_config.yaml
+# Use with: uv run python -m hubbardml train example_train_config.yaml model_output/
+
+# Data and model configuration
+data:
+  file: "data/dataset_test.h5"     # Path to HDF5 data file
+  model_type: "u"                  # Model type: "u" or "v"
 
 graph:
+  species: ["Fe", "Ni", "Mn"]      # Elements to include in model
   with_param_in: false
 
 model:
