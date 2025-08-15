@@ -1,17 +1,12 @@
-"""Backward compatibility wrapper for parse_pw3.
+"""SCF text output parser for Quantum ESPRESSO.
 
-DEPRECATED: This module is kept for backward compatibility only.
-New code should use: from hubbardml.io import read_occupations_scf
-
-The parsing functionality has been moved to:
-hubbardml.io.occupations.espresso.scf
+This module contains the ADHD-friendly parser for QE SCF text output files.
 """
 
-import warnings
-
-import numpy as np
-from typing import NamedTuple, Dict
+from typing import Dict, NamedTuple
 from pathlib import Path
+from dataclasses import dataclass
+import numpy as np
 
 
 class Occupation(NamedTuple):
@@ -28,19 +23,48 @@ class Occupation(NamedTuple):
 
 class ParseResult(NamedTuple):
     """Result of parsing with clear naming."""
-    data: Dict[int, Occupation] | None
+    data: Dict[int, Occupation] | Occupation | None
     lines_processed: int
 
 
-def parse_all_hubbard_occupations(filename: str) -> Dict[int, Dict[int, Occupation]]:
-    """Parse occupation matrices from QE SCF output file.
+@dataclass 
+class OccupationData:
+    """Container for occupation matrices from QE calculations."""
+    atoms: Dict[int, Dict[int, Occupation]]
     
-    Returns: {atom_number: {spin_number: Occupation}}
-    Example: {1: {1: Occupation(...), 2: Occupation(...)}, 2: {...}}
+    def __len__(self) -> int:
+        """Number of atoms."""
+        return len(self.atoms)
+    
+    def get_atom_occupations(self, atom_id: int) -> Dict[int, Occupation]:
+        """Get all spin occupations for an atom."""
+        return self.atoms[atom_id]
+    
+    def get_occupation(self, atom_id: int, spin: int) -> Occupation:
+        """Get specific atom-spin occupation."""
+        return self.atoms[atom_id][spin]
+
+
+def read_occupations_scf(file: Path | str) -> OccupationData:
+    """Read Hubbard occupation matrices from QE SCF text output.
+    
+    Args:
+        file: Path to SCF output file (typically 'scf.out')
+        
+    Returns:
+        OccupationData with parsed occupation matrices
+        
+    Example:
+        >>> data = read_occupations_scf("scf.out")
+        >>> len(data)  # Number of atoms
+        4
+        >>> occ = data.get_occupation(atom_id=1, spin=1)
+        >>> occ.occupations.shape
+        (5, 5)
     """
-    file_path = Path(filename)
+    file_path = Path(file)
     if not file_path.exists():
-        raise FileNotFoundError(f"SCF file not found: {filename}")
+        raise FileNotFoundError(f"SCF file not found: {file}")
 
     # Read all lines at once (simpler than streaming)
     lines = file_path.read_text().strip().split('\n')
@@ -57,7 +81,7 @@ def parse_all_hubbard_occupations(filename: str) -> Dict[int, Dict[int, Occupati
     if not atoms:
         raise ValueError("No occupation data found in SCF file")
     
-    return atoms
+    return OccupationData(atoms=atoms)
 
 
 def _find_final_scf_completion(lines: list[str]) -> int:
@@ -279,26 +303,10 @@ def _read_matrix(lines: list[str], matrix_start_line: int, size: int) -> tuple[n
         return None, 0
 
 
-def main():
-    """Test the parser."""
+if __name__ == "__main__":
     import sys
     if len(sys.argv) != 2:
-        print("Usage: python parse_pw3_clean.py <scf_file>")
+        print("Usage: python scf.py <scf_output_file>")
         sys.exit(1)
-    
-    try:
-        data = parse_all_hubbard_occupations(sys.argv[1])
-        print(f"✓ Parsed {len(data)} atoms")
-        
-        for atom_idx, spins in data.items():
-            print(f"  Atom {atom_idx}: {len(spins)} spins")
-            for spin_idx, occ in spins.items():
-                print(f"    Spin {spin_idx}: {occ.occupations.shape} matrix, trace={occ.trace:.3f}")
-                
-    except Exception as e:
-        print(f"✗ Error: {e}")
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
+    from pprint import pprint
+    pprint(read_occupations_scf(sys.argv[1]))

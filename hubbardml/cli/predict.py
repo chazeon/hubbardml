@@ -7,10 +7,9 @@ import json
 import torch
 import e3psi
 
-# Import HubbardML components
-from ..io import render_predictions
+# Import HubbardML components  
+from ..io import render_predictions, read_occupations_scf
 from .. import models, graphs
-from ..parse_pw3 import parse_all_hubbard_occupations
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 DTYPE = torch.float32
@@ -41,17 +40,18 @@ def predict_from_scf(model_path: Path, scf_file: Path):
     model.load_state_dict(torch.load(pth_file, map_location=DEVICE))
     model.eval()
     
-    # Parse SCF and predict
+    # Parse SCF file for occupation matrices
     try:
-        occs = parse_all_hubbard_occupations(str(scf_file))
-    except Exception:
-        # If parsing fails (e.g., dummy file), use fallback
-        print("Warning: Could not parse SCF file, using dummy occupation data")
-        import numpy as np
-        dummy_occs = np.ones((5, 5)) * 0.5  # 5x5 d-orbital matrix
-        from collections import namedtuple
-        Occupation = namedtuple('Occupation', ['occupations'])
-        occs = {1: {1: Occupation(dummy_occs), 2: Occupation(dummy_occs)}}
+        occupation_data = read_occupations_scf(scf_file)
+        occs = occupation_data.atoms  # Backward compatibility
+        if not occs:
+            raise ValueError("No Hubbard occupations found in SCF file")
+    except (FileNotFoundError, IOError) as e:
+        raise click.ClickException(f"Cannot read SCF file: {e}")
+    except ValueError as e:
+        raise click.ClickException(f"SCF parsing failed: {e}")
+    except Exception as e:
+        raise click.ClickException(f"Unexpected error parsing SCF file: {e}")
     
     site_tensors = []
     site_indices = []

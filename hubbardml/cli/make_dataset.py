@@ -1,4 +1,4 @@
-from pw_parsers.parse_pw3 import parse_all_hubbard_occupations
+from hubbardml.io import read_occupations_scf
 from pw_parsers.parse_u import parse_hubbard
 
 
@@ -40,7 +40,8 @@ for hp_dir in hp_results:
             scf_file = hub_file.parent / "scf.out"
             
             hubbard_parameters = parse_hubbard(hub_file.read_text().splitlines())
-            hubbard_occupations = parse_all_hubbard_occupations(scf_file)
+            occupation_data = read_occupations_scf(scf_file)
+            hubbard_occupations = occupation_data.atoms
 
             print(scf_file)
             # print(len(hubbard_parameters), len(hubbard_occupations))

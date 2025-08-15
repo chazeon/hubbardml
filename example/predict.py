@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from hubbardml import models, graphs
-from hubbardml.parse_pw3 import parse_all_hubbard_occupations
+from hubbardml.io import read_occupations_scf
 
 import torch
 import e3psi
@@ -24,7 +24,8 @@ BATCH_SIZE = 128  # can be adjusted depending on GPU memory
 def main(scf_out: str, model_path: str, model_config: str):
 
     # Load parsed occupations from SCF output
-    occs = parse_all_hubbard_occupations(scf_out)
+    occupation_data = read_occupations_scf(scf_out)
+    occs = occupation_data.atoms
 
     # Load model config and instantiate model
     with open(model_config) as fp:
