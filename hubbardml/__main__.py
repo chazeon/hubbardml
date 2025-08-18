@@ -27,16 +27,16 @@ def main():
     sys.argv = [sys.argv[0]] + sys.argv[2:]
     
     if command == "train":
-        from .cli.train import main as train_main
+        from hubbardml.cli.train import main as train_main
         train_main()
     elif command == "predict":
-        from .cli.predict import main as predict_main
+        from hubbardml.cli.predict import main as predict_main
         predict_main()
     elif command == "inspect":
-        from .cli.inspect import main as inspect_main
+        from hubbardml.cli.inspect import main as inspect_main
         inspect_main()
     elif command in ("convert", "convert-hdf5"):  # Support both names
-        from .cli.convert import main as convert_main
+        from hubbardml.cli.convert import main as convert_main
         convert_main()
     else:
         print(f"Error: Unknown command '{command}'")
