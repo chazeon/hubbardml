@@ -70,12 +70,12 @@ def from_arrow(arrow_file: Path, hdf5_file: Path, overwrite: bool):
         click.echo(f"Converting {arrow_file} → {hdf5_file}")
         result = convert_arrow_to_hdf5(str(arrow_file), str(hdf5_file))
         
-        click.echo("✓ Conversion successful!")
+        click.echo("Conversion successful!")
         click.echo(f"  Input:  {arrow_file} ({arrow_file.stat().st_size / 1024 / 1024:.1f} MB)")
         click.echo(f"  Output: {hdf5_file} ({hdf5_file.stat().st_size / 1024 / 1024:.1f} MB)")
         
     except Exception as e:
-        click.echo(f"✗ Error during conversion: {e}", err=True)
+        click.echo(f"Error during conversion: {e}", err=True)
         import traceback
         traceback.print_exc()
         sys.exit(1)

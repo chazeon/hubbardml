@@ -157,14 +157,20 @@ uv run python run.py experiment=predict_hp model=v
 uv run python run.py model=u trainer.max_epochs=1000 train.batch_size=512
 ```
 
-### Custom Training (When Available)
+### Model Training
 
 ```bash
-# Train from HDF5 data (implementation in progress)
-uv run python -m hubbardml.cli.train config.yaml model_output/
+# Train U model using template configuration
+uv run python -m hubbardml.cli.train config_examples/u_model.yaml models/u_model/
+
+# Train V model
+uv run python -m hubbardml.cli.train config_examples/v_model.yaml models/v_model/
+
+# Train with Arrow data (auto-converts to HDF5)
+uv run python -m hubbardml.cli.train my_config.yaml output_dir/
 
 # Evaluate trained models
-uv run python -m hubbardml.cli.predict model_output/ test_data/scf.out
+uv run python -m hubbardml.cli.predict models/u_model/ example/fp/scf.out
 ```
 
 ## Output Formats
@@ -223,7 +229,7 @@ uv run mypy hubbardml/
 
 ### Common Issues
 
-**Import errors during training**: The training CLI is under active development. Use the example scripts for reliable training workflows.
+**File format issues**: The training CLI supports both Arrow and HDF5 formats with automatic conversion. Use `.arrow` or `.h5` files in your config.
 
 **CUDA warnings**: GPU memory warnings are normal for large models. The system falls back to CPU automatically.
 

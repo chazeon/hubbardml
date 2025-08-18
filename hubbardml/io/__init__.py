@@ -22,8 +22,9 @@ from .occupations import (
 # Prediction formatting
 from .predictions import render_predictions, render_template
 
-# Dataset operations - placeholder for future implementations
-# from .datasets import convert_arrow_to_hdf5, load_hdf5
+# Dataset operations
+from .datasets import convert_arrow_to_hdf5
+from .formats import load_hdf5
 
 __all__ = [
     # Data structures
@@ -33,5 +34,8 @@ __all__ = [
     "read_occupations", "read_occupations_scf", "read_occupations_xml",
     
     # Output formatting
-    "render_predictions", "render_template"
+    "render_predictions", "render_template",
+    
+    # Dataset operations
+    "convert_arrow_to_hdf5", "load_hdf5"
 ]

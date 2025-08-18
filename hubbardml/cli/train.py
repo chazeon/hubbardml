@@ -330,7 +330,7 @@ class VDataset(Dataset):
 
 
 def load_data(config: Dict[str, dict], config_file: Path) -> Tuple[object, str]:
-    """Load the HDF5 data file."""
+    """Load data file, converting Arrow to HDF5 if needed."""
     # Get data file path
     data_file_str = config["data"]["file"]
     data_file = Path(data_file_str)
@@ -341,6 +341,24 @@ def load_data(config: Dict[str, dict], config_file: Path) -> Tuple[object, str]:
 
     if not data_file.exists():
         raise FileNotFoundError(f"Data file not found: {data_file}")
+
+    # Smart format handling: Auto-convert Arrow to HDF5 for optimal training performance
+    if data_file.suffix.lower() == '.arrow':
+        # Auto-convert Arrow to HDF5 (cached for future runs)
+        hdf5_file = data_file.with_suffix('.h5')
+        
+        if not hdf5_file.exists():
+            print(f"Converting Arrow to HDF5: {data_file} → {hdf5_file}")
+            from ..io.datasets.arrow_to_hdf5 import convert_arrow_to_hdf5
+            convert_arrow_to_hdf5(str(data_file), str(hdf5_file))
+            print(f"Conversion complete: {hdf5_file}")
+        else:
+            print(f"Using existing HDF5 file: {hdf5_file}")
+        
+        # Use the HDF5 file for optimized training performance
+        data_file = hdf5_file
+    elif data_file.suffix.lower() not in ['.h5', '.hdf5']:
+        raise ValueError(f"Unsupported data format: {data_file.suffix}. Use .arrow or .h5 files.")
 
     # Load data
     print(f"Loading data from: {data_file}")
@@ -371,6 +389,19 @@ def main(config_file: Path, output_dir: Path):
 
     CONFIG_FILE: Path to YAML configuration file
     OUTPUT_DIR: Directory to save trained model
+    
+    \b
+    Data Format Support:
+      • .h5/.hdf5 files - Used directly for training
+      • .arrow files - Automatically converted to .h5 format
+    
+    \b
+    Examples:
+      # Train with HDF5 data
+      uv run python -m hubbardml train config_examples/u_model.yaml models/u_model/
+      
+      # Train with Arrow data (auto-converts to HDF5)
+      uv run python -m hubbardml train my_config.yaml output/ 
     """
 
     try:
