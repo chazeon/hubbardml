@@ -1,131 +1,270 @@
 # HubbardML
 
-
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
-[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/muhrin/hubbardml/?ref=repository-badge)
 
-## About
+HubbardML is a machine learning library for predicting self-consistent Hubbard parameters using equivariant neural networks. This implementation predicts DFT+U parameters from electronic occupation matrices, enabling more accurate materials modeling with reduced computational cost.
 
-This repository contains source code for our machine learning model for predicting self-consistent Hubbard parameters, as presented in this work:
-
-Uhrin, M., Zadoks, A., Binci, L., Marzari, N., & Timrov, I. (2025). Machine learning Hubbard parameters with equivariant neural networks. Npj Computational Materials, 11(1), 19. [https://doi.org/10.1038/s41524-024-01501-5i](https://www.nature.com/articles/s41524-024-01501-5)
+**Associated Publication:**
+> Uhrin, M., Zadoks, A., Binci, L., Marzari, N., & Timrov, I. (2025). Machine learning Hubbard parameters with equivariant neural networks. *Nature Computational Materials*, 11(1), 19. [DOI: 10.1038/s41524-024-01501-5](https://www.nature.com/articles/s41524-024-01501-5)
 
 ## Quick Start
 
-### Option 1: CLI Tools (Recommended)
-
-Use the modern CLI interface for training and prediction:
+The fastest way to get started is with our working example:
 
 ```bash
-# Install with development dependencies
+# 1. Clone and install
+git clone https://github.com/muhrin/hubbardml
+cd hubbardml
 uv sync --extra dev
 
-# Test the complete pipeline
-uv run python tests/test_end_to_end.py
-
-# Train a model (uses PyTorch Lightning-style config)
-uv run python -m hubbardml.cli.train data/dataset_test.h5 example_train_config.yaml model_output/
-
-# Make predictions
-uv run python -m hubbardml.cli.predict model_output/ scf.out
-
-# Inspect datasets
-uv run python -m hubbardml.cli.inspect data/dataset_test.h5
-
-# Convert data formats
-uv run python -m hubbardml.cli.convert data/dataset.arrow data/dataset_test.h5
+# 2. Try the complete workflow
+cd example/
+# Follow the step-by-step README.md for data download and training
 ```
 
-### Option 2: Example Scripts
-
-For a simple getting-started example, see the `example/` directory:
+Or jump straight to prediction with a pre-trained model:
 
 ```bash
-# Download dataset, inspect data, train model, make predictions
-cd example/
-# Follow the step-by-step README.md
+# Predict Hubbard parameters from QE output
+uv run python -m hubbardml.cli.predict u_model/ example/fp/scf.out
+
+# Multiple output formats available
+uv run python -m hubbardml.cli.predict u_model/ example/fp/scf.out -t json
+uv run python -m hubbardml.cli.predict u_model/ example/fp/scf.out -t qe_legacy
 ```
 
-This provides a self-contained workflow with data download instructions and working scripts.
+## Features
 
-## Advanced Usage
+- **Self-consistent prediction**: Predicts converged DFT+U parameters from linear-response calculations
+- **Fast inference**: XML and SCF output file support with automatic format detection  
+- **High accuracy**: Equivariant neural networks preserve rotational symmetry
+- **Multiple formats**: JSON, Quantum ESPRESSO input, legacy format outputs
+- **Data analysis**: Built-in dataset inspection and visualization tools
+- **Modern CLI**: Clean command-line interface for all operations
 
-The experiments carried out in this work can be found in the `experiments/` folder along with all the notebooks to generate the plots.
-
-For advanced usage with Hydra configuration management:
-
-    python run.py experiment=predict_hp model=u
-
-Additional experiments can be found in the `experiments/experiment/` folder.
+### Supported Systems
+- **Elements**: Fe, Ni, Mn, Co, Ti, O, S transition metal compounds
+- **Parameters**: U (on-site, 3-8 eV) and V (inter-site, 0.1-2 eV) interactions
+- **Input formats**: Quantum ESPRESSO SCF output (.out) and XML (.xml) files
+- **Output formats**: QE input blocks, JSON, legacy formats
 
 ## Installation
 
-HubbardML uses [uv](https://docs.astral.sh/uv/) for fast dependency management and reproducible environments.
+HubbardML uses [uv](https://docs.astral.sh/uv/) for fast dependency management:
 
-### Install with uv (recommended)
-
+### Development Setup (Recommended)
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd hubbardml
-
-# Development setup - installs all dependencies including dev tools
-uv sync --extra dev
-
-# Production setup - runtime dependencies only
-uv sync
-```
-
-### Alternative installation methods
-
-```bash
-# Using uv with pip-style commands
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install -e .[dev]
-
-# Traditional pip installation (fallback)
-pip install -e .
-pip install -e .[dev]
-```
-
-### Development Setup
-
-```bash
-# Full development environment
-git clone <repository-url>
+git clone https://github.com/muhrin/hubbardml
 cd hubbardml
 uv sync --extra dev
 
-# Install pre-commit hooks (optional)
+# Optional: install pre-commit hooks
 uv run pre-commit install
 ```
 
-## Dataset
-
-The datasets used in this work are available for download:
-
-### Published Dataset
-- **Main dataset**: `data_uv_2024_1_25.arrow` (69MB, 645k entries)
-- **Test dataset**: `dataset.arrow` (153KB, 164 entries)  
-- **Download from**: [Zenodo record](https://zenodo.org/record/XXXXXX) (see paper for exact link)
-
-### Dataset Contents
-- **Elements**: Fe, Ni, Mn, Co, Ti, O, S transition metal compounds
-- **U parameters**: On-site Coulomb repulsion energies (3-8 eV)
-- **V parameters**: Inter-site Coulomb interaction energies (0.1-2 eV)
-- **Features**: Electronic occupation matrices from DFT+U calculations
-- **Target**: Self-consistent vs linear-response Hubbard parameters
-
-Use the inspection utility to analyze your data:
+### Production Setup
 ```bash
-uv run python -m hubbardml inspect data/data_uv_2024_1_25.arrow
+uv sync  # Runtime dependencies only
+```
+
+### Alternative Methods
+```bash
+# Using uv with pip-style workflow
+uv venv && source .venv/bin/activate
+uv pip install -e .[dev]
+
+# Traditional pip (fallback)
+pip install -e .[dev]
 ```
 
 ## Usage
 
-### Running Experiments
+### CLI Tools
 
-From the `experiments/` directory:
+#### Prediction (Primary Use Case)
+```bash
+# Basic prediction from SCF output
+uv run python -m hubbardml.cli.predict u_model/ scf.out
+
+# From XML output with JSON format
+uv run python -m hubbardml.cli.predict u_model/ pwscf.xml -t json
+
+# Save to file with custom variables
+uv run python -m hubbardml.cli.predict u_model/ scf.out -o results.txt -v projection_type:atomic
+```
+
+#### Dataset Analysis
+```bash
+# Inspect the dataset
+uv run python -m hubbardml.cli.inspect data/data_uv_2024_1_25.arrow
+
+# Quick summary only
+uv run python -m hubbardml.cli.inspect data/data_uv_2024_1_25.arrow --summary
+```
+
+#### Data Conversion
+```bash
+# Convert between formats (when implemented)
+uv run python -m hubbardml.cli.convert dataset.arrow dataset.h5
+```
+
+### Working with Data
+
+#### Available Datasets
+- **Main dataset**: `data_uv_2024_1_25.arrow` (69MB, 645k entries) - Complete published dataset
+  - Download: [Materials Cloud Archive](https://archive.materialscloud.org/record/2024.160)
+
+#### Dataset Contents
+```bash
+# Example inspection output
+uv run python -m hubbardml.cli.inspect data/data_uv_2024_1_25.arrow
+
+# Shows:
+# - Element distribution (Fe, Ni, Mn, etc.)
+# - Parameter statistics (U: ~5.8 eV mean, V: ~0.7 eV mean)  
+# - Occupation matrix dimensions (5×5 d-orbitals, 3×3 p-orbitals)
+# - Storage efficiency analysis
+```
+
+## Model Architecture
+
+HubbardML implements equivariant neural networks that preserve the 3D rotational symmetry of electronic systems:
+
+- **UModel**: On-site Hubbard U parameters using single-site architecture
+- **VModel**: Inter-site Hubbard V parameters using two-site architecture  
+- **Features**: d-orbital occupation matrices from DFT calculations
+- **Symmetry**: E(3)-equivariant layers via e3nn and e3psi libraries
+- **Species**: Supports Fe, Ni, Mn (Co, Ti excluded due to limited training data)
+
+## Advanced Usage
+
+### Research Experiments
+
+The complete experimental workflow from the paper is available:
+
+```bash
+cd experiments/
+
+# Train U model with Hydra configuration
+uv run python run.py experiment=predict_hp model=u
+
+# Train V model  
+uv run python run.py experiment=predict_hp model=v
+
+# Custom experiments
+uv run python run.py model=u trainer.max_epochs=1000 train.batch_size=512
+```
+
+### Custom Training (When Available)
+
+```bash
+# Train from HDF5 data (implementation in progress)
+uv run python -m hubbardml.cli.train config.yaml model_output/
+
+# Evaluate trained models
+uv run python -m hubbardml.cli.predict model_output/ test_data/scf.out
+```
+
+## Output Formats
+
+### Quantum ESPRESSO Input
+```bash
+uv run python -m hubbardml.cli.predict u_model/ scf.out -t qe_simple
+# Output: HUBBARD (ortho-atomic)
+#         U Fe-3d 5.23
+#         U Ni-3d 6.41
+```
+
+### JSON Format
+```bash
+uv run python -m hubbardml.cli.predict u_model/ scf.out -t json
+# Output: {"model_info": {...}, "predictions": {"u_parameters": [...]}}
+```
+
+### Legacy Format
+```bash
+uv run python -m hubbardml.cli.predict u_model/ scf.out -t qe_legacy
+# Output: &system
+#           lda_plus_u = .true.
+#           Hubbard_V(1,1,1) = 5.23
+#         /
+```
+
+## Development
+
+### Testing
+```bash
+# Run full test suite
+uv run pytest
+
+# Test specific components
+uv run pytest tests/test_models.py
+uv run pytest tests/test_predict_pipeline.py
+
+# End-to-end pipeline test
+uv run python tests/test_end_to_end.py
+```
+
+### Code Quality
+```bash
+# Format code
+uv run black .
+
+# Security scan
+uv run bandit -r hubbardml/
+
+# Type checking
+uv run mypy hubbardml/
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Import errors during training**: The training CLI is under active development. Use the example scripts for reliable training workflows.
+
+**CUDA warnings**: GPU memory warnings are normal for large models. The system falls back to CPU automatically.
+
+**Template not found**: Ensure you're using supported template names: `qe_simple`, `qe_legacy`, `qe_v_format`, `json`.
+
+### Getting Help
+
+- **Example workflow**: See `example/README.md` for a complete working example
+- **API documentation**: Check docstrings in `hubbardml/` modules
+- **Issues**: Report bugs and request features on GitHub
+
+## Contributing
+
+HubbardML uses modern Python development practices:
+
+- **uv** for dependency management and virtual environments
+- **black** for code formatting (line length: 100)
+- **pytest** for testing with coverage reporting
+- **pre-commit** hooks for code quality
+
+## Citation
+
+If you use HubbardML in your research, please cite:
+
+```bibtex
+@article{uhrin2025hubbardml,
+  title={Machine learning Hubbard parameters with equivariant neural networks},
+  author={Uhrin, Martin and Zadoks, Andrin and Binci, Luca and Marzari, Nicola and Timrov, Iurii},
+  journal={Nature Computational Materials},
+  volume={11},
+  number={1},
+  pages={19},
+  year={2025},
+  doi={10.1038/s41524-024-01501-5}
+}
+```
+
+## License
+
+HubbardML is licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0).
+
+Copyright (c) 2022, Martin Uhrin.
+
+See the [LICENSE](LICENSE) file for full details.

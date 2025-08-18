@@ -9,16 +9,12 @@ This example demonstrates how to train a machine learning model to predict self-
 Download the published dataset from the paper's repository:
 
 ```bash
-# Download the main dataset (69MB, 645k entries)
+# Download the dataset (69MB, 645k entries) from Materials Cloud
 curl -L -o data/data_uv_2024_1_25.arrow \
-  "https://zenodo.org/record/XXXXXX/files/data_uv_2024_1_25.arrow"
-
-# Or download the small test dataset (153KB, 164 entries)  
-curl -L -o data/dataset.arrow \
-  "https://zenodo.org/record/XXXXXX/files/dataset.arrow"
+  "https://archive.materialscloud.org/record/file?filename=data_uv_2024_1_25.arrow&record_id=2024.160"
 ```
 
-**Note**: Replace `XXXXXX` with the actual Zenodo record ID from the paper.
+**Dataset source**: [Materials Cloud Archive Record 2024.160](https://archive.materialscloud.org/record/2024.160)
 
 ### 2. Install HubbardML
 
