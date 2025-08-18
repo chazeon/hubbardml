@@ -8,7 +8,7 @@ import torch
 import e3psi
 
 # Import HubbardML components  
-from ..io import render_predictions, read_occupations_scf
+from ..io import render_predictions, read_occupations
 from .. import models, graphs
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -42,7 +42,7 @@ def predict_from_scf(model_path: Path, scf_file: Path):
     
     # Parse SCF file for occupation matrices
     try:
-        occupation_data = read_occupations_scf(scf_file)
+        occupation_data = read_occupations(scf_file)
         occs = occupation_data.atoms  # Backward compatibility
         if not occs:
             raise ValueError("No Hubbard occupations found in SCF file")

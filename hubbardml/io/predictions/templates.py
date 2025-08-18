@@ -8,7 +8,7 @@ from datetime import datetime
 
 def get_template_dir() -> Path:
     """Get the templates directory."""
-    return Path(__file__).parent.parent / "templates"
+    return Path(__file__).parent.parent.parent / "templates"
 
 
 def setup_jinja_env() -> jinja2.Environment:
